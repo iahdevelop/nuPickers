@@ -2,6 +2,7 @@
 {
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using nuPickers.Shared.Editor;
     using nuPickers.Shared.EnumDataSource;
     using nuPickers.Shared.RelationMapping;
     using nuPickers.Shared.SaveFormat;
@@ -19,6 +20,11 @@
         /// cache var, set once, stores the configuration options for the data-type this picker is using
         /// </summary>
         private IDictionary<string, PreValue> dataTypePreValues = null;
+
+        /// <summary>
+        /// cache var, stores collection of all keys
+        /// </summary>
+        private string[] allKeys = null;
 
         /// <summary>
         /// cache var, stores value after querying relations or parsing a save format
@@ -91,6 +97,26 @@
         public object SavedValue { get; private set; }
 
         /// <summary>
+        /// returns a collection of all keys (labels and typeaheads not supported)
+        /// </summary>
+        public IEnumerable<string> AllKeys
+        {
+            get
+            {
+                if (this.allKeys == null)
+                {
+                    IEnumerable<EditorDataItem> editorDataItems = Enumerable.Empty<EditorDataItem>();
+
+                    // TODO: switch on apiController name from the dataSource
+
+                    this.allKeys = editorDataItems.Select(x => x.Key).ToArray();
+                }
+
+                return this.allKeys;
+            }
+        }
+
+        /// <summary>
         /// returns a collection of all picked keys (regardless as to how / where they are persisted)
         /// </summary>
         public IEnumerable<string> PickedKeys
@@ -108,9 +134,11 @@
                     }
                     else
                     {
-                        this.pickedKeys = this.SavedValue != null ? SaveFormat
+                        this.pickedKeys = this.SavedValue != null 
+                                                                ? SaveFormat
                                                                         .GetSavedKeys(this.SavedValue.ToString())
-                                                                        .ToArray() : new string[]{};
+                                                                        .ToArray() 
+                                                                : new string[]{};
                     }
                 }
 
